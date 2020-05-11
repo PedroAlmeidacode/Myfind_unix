@@ -1,0 +1,3 @@
+/home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles/Myfind.dir
