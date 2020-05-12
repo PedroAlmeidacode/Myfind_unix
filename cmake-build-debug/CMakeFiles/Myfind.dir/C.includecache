@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pedro/Desktop/Myfind_unix/library.h
+stdio.h
+-
+string.h
+-
+stdbool.h
+-
+unistd.h
+-
+ctype.h
+-
+stdlib.h
+-
+
+/home/pedro/Desktop/Myfind_unix/main.c
+library.h
+/home/pedro/Desktop/Myfind_unix/library.h
+
