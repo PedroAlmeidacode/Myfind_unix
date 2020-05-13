@@ -19,6 +19,20 @@ ctype.h
 -
 stdlib.h
 -
+dirent.h
+-
+errno.h
+-
+sys/types.h
+-
+stdio.h
+-
+stdlib.h
+-
+sys/stat.h
+-
+string.h
+-
 
 /home/pedro/Desktop/Myfind_unix/main.c
 library.h
