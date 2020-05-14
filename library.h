@@ -8,6 +8,7 @@
 
 #endif //MYFIND_LIBRARY_H
 
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -22,7 +23,6 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <string.h>
-
 
 void * search_directory_create_thread_to_search_it(void * param);
 
@@ -139,8 +139,8 @@ int isAboveorUnderSize(int size, bool above_size, const char *path) {
     if (stat(path, &statbuf) != 0)
         return 0;
     if(above_size == true ){
-        return bytes_size > statbuf.st_size;
-    }else return bytes_size < statbuf.st_size;
+        return statbuf.st_size > bytes_size ;
+    }else return statbuf.st_size < bytes_size;
 }
 
 /**
@@ -154,20 +154,27 @@ int isAboveorUnderSize(int size, bool above_size, const char *path) {
 int isMmin(int nnmin, const char *path) {
     if (nnmin == 0) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     struct stat file_stat;
+
     int err = stat(path, &file_stat);
     if (err != 0) {
         perror(" [file_is_modified] stat");
         exit(errno);
     }
-    struct tm *time_of_mod;
-    struct tm *time;
-    stat(path, &file_stat);
-    time_of_mod = gmtime(&(file_stat.st_mtime)); // obtem o tempo da ultima modificacao do ficheiro
-    time = localtime(0); // obtem a hora local
-    // obtem o tempo pedido, o ficheiro nao deve ter sido criado antes deste tempo para retornar verdadeiro
-    time = (struct tm *) (time->tm_min - nnmin);
-    if (time_of_mod > time) return 1; //esta comparacao poder na estar a resultar
+    struct tm time_of_mod;
 
+    stat(path, &file_stat);
+    time_of_mod = *gmtime(&(file_stat.st_mtime)); // obtem o tempo da ultima modificacao do ficheiro
+
+    //time_t t = time(NULL);
+    //struct tm *tm = localtime(&t); // get current time
+    time_t now;
+    time(&now);
+
+    // obtem o tempo pedido, o ficheiro nao deve ter sido criado antes deste tempo para retornar verdadeiro
+
+    double difference_in_seconds = difftime(now, mktime(&time_of_mod));
+    double seconds_of_argv = nnmin * 60; // each minute has 60 seconds
+    if (difference_in_seconds < seconds_of_argv) return 1;
     return 0;
 }
 
@@ -265,10 +272,13 @@ int isType(const char type, const char *path) {
  * @return retorna true se um dos 3 elementos checkar com o d_name
  */
 int isIname(const char * name, const char * suf, const char * pref, char *d_name) {
-
     if (name == NULL && suf == NULL && pref == NULL) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
-    if (name == d_name) return 1;
+    if(name != NULL){
+        if (strcmp(name,d_name) == 0){
+            return 1;
+        }else return 0;
+    }
     if (pref != NULL){
         // testar se prefixo == a primeira parte de d_name
         for (int i = 0; i < strlen(pref) ; i++) {
@@ -280,7 +290,7 @@ int isIname(const char * name, const char * suf, const char * pref, char *d_name
     }
     // testar se o sufixo  == a ultima parte de d_name
     int last_pos_suf = strlen(suf) -1;
-    int last_pos_name = strlen(name) - 1;
+    int last_pos_name = strlen(d_name) - 1;
     while(last_pos_suf >= 0){
         if (d_name[last_pos_name] != suf[last_pos_suf]){
             return 0; // se for diferente retorna logo falso
@@ -290,6 +300,10 @@ int isIname(const char * name, const char * suf, const char * pref, char *d_name
     }
     return 1;
 }
+
+
+
+
 
 /**
  * Se os 3 estiverem a null ele automaticamente retorna true pois nao foi expecificado como argumento
@@ -304,9 +318,13 @@ int isIname(const char * name, const char * suf, const char * pref, char *d_name
  * @param d_name ficheiro em investigacao
  * @return retorna true se um dos 3 elementos checkar com o d_name
  */
-int isName(const char * name, const char * suf, const char * pref, const char *d_name) {
+int isName(const char * name,const char * suf,const char * pref,const char *d_name) {
     if (name == NULL && suf == NULL && pref == NULL) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
-    if (name == d_name) return 1;
+    if(name != NULL){
+        if (strcmp(name,d_name) == 0){
+            return 1;
+        }else return 0;
+    }
     if (pref != NULL){
         // testar se prefixo == a primeira parte de d_name
         for (int i = 0; i < strlen(pref) ; i++) {
@@ -318,7 +336,7 @@ int isName(const char * name, const char * suf, const char * pref, const char *d
     }
     // testar se o sufixo  == a ultima parte de d_name
     int last_pos_suf = strlen(suf) -1;
-    int last_pos_name = strlen(name) - 1;
+    int last_pos_name = strlen(d_name) - 1;
     while(last_pos_suf >= 0){
         if (d_name[last_pos_name] != suf[last_pos_suf]){
             return 0; // se for diferente retorna logo falso
@@ -333,17 +351,16 @@ int isName(const char * name, const char * suf, const char * pref, const char *d
 
 
 
+void print_struct(struct threads *args) {
+    printf("path: %s\n", args->path);
+    printf("name: %s%s%s\n", args->name, args->sufix_name, args->prefix_name);
+    printf("iname: %s%s%s\n", args->iname, args->sufix_iname, args->prefix_iname);
+    printf("type: %c\n", args->type);
+    printf("empty: %d\n", args->empty);
+    printf("executable: %d\n", args->executable);
+    printf("mmin: %d\n", args->mmin);
+    printf("size: %d above this: %d\n", args->size, args->above_size);
 
-
-void print_struct(struct threads args) {
-    printf("path: %s\n", args.path);
-    printf("name: %s%s%s\n", args.name, args.sufix_name, args.prefix_name);
-    printf("iname: %s%s%s\n", args.iname, args.sufix_iname, args.prefix_iname);
-    printf("type: %c\n", args.type);
-    printf("empty: %d\n", args.empty);
-    printf("executable: %d\n", args.executable);
-    printf("mmin: %d\n", args.mmin);
-    printf("size: %d above this: %d\n", args.size, args.above_size);
 }
 
 void inicialize_threads_struct(struct threads *args) {
@@ -444,13 +461,13 @@ void parse_args(int argc, char *argv[], struct threads *args) {
                 i += 2;
 
             } else if (strcmp(argv[i], "-type") == 0) {
-                char carecter = (char) argv[1];
+                char carecter = argv[i+1][0];
                 // se for differente de todas nao esta dentro das escolhas para o tipo
                 if(carecter != 'c' && carecter != 'b' && carecter != 'd' && carecter != 'p' && carecter != 'f' && carecter != 'l' && carecter != 's' && carecter != 'd' ){
                     printf("type choosed is not acepted\n");
                     exit(EXIT_FAILURE);
                 }
-                args->type = (char) argv[i + 1];
+                args->type = carecter;
                 i += 2;
             } else if (strcmp(argv[i], "-empty") == 0) {
                 args->empty = true;

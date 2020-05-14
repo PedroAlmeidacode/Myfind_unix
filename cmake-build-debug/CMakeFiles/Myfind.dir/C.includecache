@@ -7,6 +7,8 @@
 #IncludeRegexTransform: 
 
 /home/pedro/Desktop/Myfind_unix/library.h
+time.h
+-
 stdio.h
 -
 string.h
