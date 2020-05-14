@@ -29,6 +29,8 @@ stdio.h
 -
 stdlib.h
 -
+pthread.h
+-
 sys/stat.h
 -
 string.h
