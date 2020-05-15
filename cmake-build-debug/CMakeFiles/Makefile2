@@ -74,12 +74,12 @@ clean: CMakeFiles/Myfind.dir/clean
 CMakeFiles/Myfind.dir/all:
 	$(MAKE) -f CMakeFiles/Myfind.dir/build.make CMakeFiles/Myfind.dir/depend
 	$(MAKE) -f CMakeFiles/Myfind.dir/build.make CMakeFiles/Myfind.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target Myfind"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles --progress-num=1,2,3 "Built target Myfind"
 .PHONY : CMakeFiles/Myfind.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Myfind.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles 3
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/Myfind.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Myfind_unix/cmake-build-debug/CMakeFiles 0
 .PHONY : CMakeFiles/Myfind.dir/rule

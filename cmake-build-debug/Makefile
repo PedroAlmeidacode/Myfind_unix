@@ -123,6 +123,33 @@ Myfind/fast:
 	$(MAKE) -f CMakeFiles/Myfind.dir/build.make CMakeFiles/Myfind.dir/build
 .PHONY : Myfind/fast
 
+lib_util.o: lib_util.c.o
+
+.PHONY : lib_util.o
+
+# target to build an object file
+lib_util.c.o:
+	$(MAKE) -f CMakeFiles/Myfind.dir/build.make CMakeFiles/Myfind.dir/lib_util.c.o
+.PHONY : lib_util.c.o
+
+lib_util.i: lib_util.c.i
+
+.PHONY : lib_util.i
+
+# target to preprocess a source file
+lib_util.c.i:
+	$(MAKE) -f CMakeFiles/Myfind.dir/build.make CMakeFiles/Myfind.dir/lib_util.c.i
+.PHONY : lib_util.c.i
+
+lib_util.s: lib_util.c.s
+
+.PHONY : lib_util.s
+
+# target to generate assembly for a file
+lib_util.c.s:
+	$(MAKE) -f CMakeFiles/Myfind.dir/build.make CMakeFiles/Myfind.dir/lib_util.c.s
+.PHONY : lib_util.c.s
+
 main.o: main.c.o
 
 .PHONY : main.o
@@ -159,6 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... Myfind"
+	@echo "... lib_util.o"
+	@echo "... lib_util.i"
+	@echo "... lib_util.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -1,1 +1,1 @@
-/usr/bin/cc -g   CMakeFiles/Myfind.dir/main.c.o  -o Myfind 
+/usr/bin/cc -g   CMakeFiles/Myfind.dir/main.c.o CMakeFiles/Myfind.dir/lib_util.c.o  -o Myfind 

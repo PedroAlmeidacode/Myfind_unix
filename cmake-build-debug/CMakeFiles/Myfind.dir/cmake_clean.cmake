@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/Myfind.dir/lib_util.c.o"
   "CMakeFiles/Myfind.dir/main.c.o"
   "Myfind"
   "Myfind.pdb"

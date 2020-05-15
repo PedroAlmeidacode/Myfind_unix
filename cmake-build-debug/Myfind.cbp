@@ -78,6 +78,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/pedro/Desktop/Myfind_unix/lib_util.c">
+			<Option target="Myfind"/>
+		</Unit>
 		<Unit filename="/home/pedro/Desktop/Myfind_unix/library.h">
 			<Option target="Myfind"/>
 		</Unit>
