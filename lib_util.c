@@ -46,7 +46,7 @@ int isDirectory(const char *path) {
     return S_ISDIR(statbuf.st_mode);
 }
 
-int isFifo(const char * path){
+int isFifo(const char *path) {
     struct stat statbuf;
     if (stat(path, &statbuf) != 0)
         return 0;
@@ -66,8 +66,6 @@ char *stringLwr(char *s) {
 }
 
 
-
-
 /**
  * Testa se o ficheiro e maior ou menor (especificado em above_size)
  * size contem o tamanho em Megas
@@ -84,9 +82,9 @@ int isAboveorUnderSize(int size, bool above_size, const char *path) {
     struct stat statbuf;
     if (stat(path, &statbuf) != 0)
         return 0;
-    if(above_size == true ){
-        return statbuf.st_size > bytes_size ;
-    }else return statbuf.st_size < bytes_size;
+    if (above_size == true) {
+        return statbuf.st_size > bytes_size;
+    } else return statbuf.st_size < bytes_size;
 }
 
 /**
@@ -132,7 +130,7 @@ int isMmin(int nnmin, const char *path) {
  * @return true se o ficheiro for executavel
  */
 int isExecutable(bool executable, const char *path) {
-    if(executable == false) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+    if (executable == false) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     struct stat statbuf;
     if (stat(path, &statbuf) == 0 && statbuf.st_mode & S_IXUSR)
         return 1;
@@ -168,37 +166,38 @@ int isEmpty(bool empty, const char *path) {
  * @return veradadeiro se for do tipo escolhido
  */
 int isType(const char type, const char *path) {
-    if (type == 'X') return 1 ;  // se nao tiver sido explicito nada nos argumentos deste parametro
+    if (type == 'X') return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     switch (type) {
         case 'c':
-            if (isCharater(path)){
+            if (isCharater(path)) {
                 return 1;
-            }else return 0;
+            } else return 0;
         case 'b':
-            if (isBlock(path)){
+            if (isBlock(path)) {
                 return 1;
-            }else return 0;
+            } else return 0;
         case 'd':
-            if (isDirectory(path)){
+            if (isDirectory(path)) {
                 return 1;
-            }else return 0;
+            } else return 0;
         case 'p':
-            if (isFifo(path)){
+            if (isFifo(path)) {
                 return 1;
-            }else return 0;
+            } else return 0;
         case 'f':
-            if (isFile(path)){
+            if (isFile(path)) {
                 return 1;
-            }else return 0;
+            } else return 0;
         case 'l':
-            if (isSymbolicLink(path)){
+            if (isSymbolicLink(path)) {
                 return 1;
-            }else return 0;
+            } else return 0;
         case 's':
-            if (isSocket(path)){
+            if (isSocket(path)) {
                 return 1;
-            }else return 0;
-        default: return 0;
+            } else return 0;
+        default:
+            return 0;
     }
 }
 
@@ -217,38 +216,36 @@ int isType(const char type, const char *path) {
  * @param d_name ficheiro em investigacao
  * @return retorna true se um dos 3 elementos checkar com o d_name
  */
-int isIname(const char * name, const char * suf, const char * pref, char *d_name) {
-    if (name == NULL && suf == NULL && pref == NULL) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+int isIname(const char *name, const char *suf, const char *pref, char *d_name) {
+    if (name == NULL && suf == NULL && pref == NULL)
+        return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
-    if(name != NULL){
-        if (strcmp(name,d_name) == 0){
+    if (name != NULL) {
+        if (strcmp(name, d_name) == 0) {
             return 1;
-        }else return 0;
+        } else return 0;
     }
-    if (pref != NULL){
+    if (pref != NULL) {
         // testar se prefixo == a primeira parte de d_name
-        for (int i = 0; i < strlen(pref) ; i++) {
-            if (d_name[i] != pref[i]){
+        for (int i = 0; i < strlen(pref); i++) {
+            if (d_name[i] != pref[i]) {
                 return 0; // se for diferente retorna logo falso
             }
         }
-        return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
+        return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen (pref) posicoes de pref
     }
     // testar se o sufixo  == a ultima parte de d_name
-    int last_pos_suf = strlen(suf) -1;
+    int last_pos_suf = strlen(suf) - 1;
     int last_pos_name = strlen(d_name) - 1;
-    while(last_pos_suf >= 0){
-        if (d_name[last_pos_name] != suf[last_pos_suf]){
+    while (last_pos_suf >= 0) {
+        if (d_name[last_pos_name] != suf[last_pos_suf]) {
             return 0; // se for diferente retorna logo falso
         }
-        last_pos_name --;
-        last_pos_suf --;
+        last_pos_name--;
+        last_pos_suf--;
     }
     return 1;
 }
-
-
-
 
 
 /**
@@ -264,55 +261,74 @@ int isIname(const char * name, const char * suf, const char * pref, char *d_name
  * @param d_name ficheiro em investigacao
  * @return retorna true se um dos 3 elementos checkar com o d_name
  */
-int isName(const char * name,const char * suf,const char * pref,const char *d_name) {
-    if (name == NULL && suf == NULL && pref == NULL) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
-    if(name != NULL){
-        if (strcmp(name,d_name) == 0){
+int isName(const char *name, const char *suf, const char *pref, const char *d_name) {
+    if (name == NULL && suf == NULL && pref == NULL)
+        return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+    if (name != NULL) {
+        if (strcmp(name, d_name) == 0) {
             return 1;
-        }else return 0;
+        } else return 0;
     }
-    if (pref != NULL){
+    if (pref != NULL) {
         // testar se prefixo == a primeira parte de d_name
-        for (int i = 0; i < strlen(pref) ; i++) {
-            if (d_name[i] != pref[i]){
+        for (int i = 0; i < strlen(pref); i++) {
+            if (d_name[i] != pref[i]) {
                 return 0; // se for diferente retorna logo falso
             }
         }
         return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
     }
     // testar se o sufixo  == a ultima parte de d_name
-    int last_pos_suf = strlen(suf) -1;
+    int last_pos_suf = strlen(suf) - 1;
     int last_pos_name = strlen(d_name) - 1;
-    while(last_pos_suf >= 0){
-        if (d_name[last_pos_name] != suf[last_pos_suf]){
+    while (last_pos_suf >= 0) {
+        if (d_name[last_pos_name] != suf[last_pos_suf]) {
             return 0; // se for diferente retorna logo falso
         }
-        last_pos_name --;
-        last_pos_suf --;
+        last_pos_name--;
+        last_pos_suf--;
     }
     return 1;
 }
 
 
+THREADS *find_my_thread_struct(pthread_t self, THREADS *mainThread) {
+    THREADS *temp = mainThread;
+    THREADS *t = temp;
+    int i = 0;
+    // procura se ja existe
+    while (temp != NULL) {
+        if (temp->thread_id == self) {
+            MATCHES *newMatch = malloc(sizeof *newMatch);
+            newMatch->next = NULL;
+            temp->matches = newMatch; // the head of the matches
+            return temp;
+        }
+        temp = temp->next;
+        if (i != 0) t = t->next; // fica sempre com a posicao anterior a temp
+        i++;
+    }
+
+    printf("Criar nova thread\n");
+
+    //se nao existir crio
+    THREADS *newThread = malloc(sizeof *newThread);
+    newThread->thread_id = self;
+    newThread->next = NULL;
+    newThread->n_matches = 1;
+    newThread->n_threads = mainThread->n_threads;
+    mainThread->n_threads++;
 
 
+    MATCHES *newMatch = malloc(sizeof *newMatch);
+    newMatch->next = NULL;
+    newThread->matches = newMatch; // the head of the matches
+    t->next = newThread; // proxima posicao NULL igual ao novo thread
 
-void print_struct(struct threads *args) {
-    printf("path: %s\n", args->path);
-    printf("name: %s%s%s\n", args->name, args->sufix_name, args->prefix_name);
-    printf("iname: %s%s%s\n", args->iname, args->sufix_iname, args->prefix_iname);
-    printf("type: %c\n", args->type);
-    printf("empty: %d\n", args->empty);
-    printf("executable: %d\n", args->executable);
-    printf("mmin: %d\n", args->mmin);
-    printf("size: %d above this: %d\n", args->size, args->above_size);
-
+    return newThread;
 }
 
-void inicialize_threads_struct(struct threads *args) {
-    args->head = NULL;
-    args->tail = NULL;
-    args->path = NULL;
+void inicialize_arguments_struct(ARGS *args) {
     args->name = NULL;
     args->prefix_name = NULL;
     args->sufix_name = NULL;
@@ -327,10 +343,10 @@ void inicialize_threads_struct(struct threads *args) {
     args->above_size = false;
 }
 
-void parse_args(int argc, char *argv[], struct threads *args) {
 
-    inicialize_threads_struct(args); //inicializa a estrtura threads
+void parse_args(int argc, char *argv[], DATA *data, ARGS *args) {
 
+    inicialize_arguments_struct(args);
     char path_wd[200];
     getcwd(path_wd, sizeof(path_wd));
 
@@ -340,18 +356,18 @@ void parse_args(int argc, char *argv[], struct threads *args) {
     if (argc >= 2) {
         char tmp = argv[1][0]; // para checkar se a primeria posicao e um ponto
         if (tmp == '.') {
-            if (strlen(argv[1]) == 1){
-                args->path = malloc(strlen(path_wd) + 1);
-                sprintf(args->path,"%s/",path_wd);
-            }else {
+            if (strlen(argv[1]) == 1) {
+                data->path = malloc(strlen(path_wd) + 1);
+                sprintf(data->path, "%s/", path_wd);
+            } else {
                 char *path_arg = argv[1];
                 memmove(&path_arg[0], &path_arg[1], strlen(path_arg)); //remove a primeira posicao
-                args->path = malloc(strlen(path_wd) + strlen(path_arg));
-                sprintf(args->path, "%s%s", path_wd, path_arg);
+                data->path = malloc(strlen(path_wd) + strlen(path_arg));
+                sprintf(data->path, "%s%s", path_wd, path_arg);
             }
         } else { // se for uma directoria em especifico
-            args->path = malloc(strlen(argv[1]));
-            args->path = argv[1];
+            data->path = malloc(strlen(argv[1]));
+            data->path = argv[1];
         }
         int i = 2;
         while (i < argc) {
@@ -407,9 +423,10 @@ void parse_args(int argc, char *argv[], struct threads *args) {
                 i += 2;
 
             } else if (strcmp(argv[i], "-type") == 0) {
-                char carecter = argv[i+1][0];
+                char carecter = argv[i + 1][0];
                 // se for differente de todas nao esta dentro das escolhas para o tipo
-                if(carecter != 'c' && carecter != 'b' && carecter != 'd' && carecter != 'p' && carecter != 'f' && carecter != 'l' && carecter != 's' && carecter != 'd' ){
+                if (carecter != 'c' && carecter != 'b' && carecter != 'd' && carecter != 'p' && carecter != 'f' &&
+                    carecter != 'l' && carecter != 's') {
                     printf("type choosed is not acepted\n");
                     exit(EXIT_FAILURE);
                 }
@@ -438,6 +455,7 @@ void parse_args(int argc, char *argv[], struct threads *args) {
                 break;
             }
         }
+        data->arguments = args;
     }
 
 }
