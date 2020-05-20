@@ -75,7 +75,15 @@ char *stringLwr(char *s) {
  * @param path ca,imho para o ficheiro a testar
  * @return true se estiver nos tamanbos estipulados
  */
-int isAboveorUnderSize(int size, bool above_size, const char *path) {
+int aboveorUnderSize(char * value, const char *path, char * d_name) {
+
+    bool above_size = false;
+    if (value[0] == '+') above_size = true;
+    char * sz = malloc(10);
+    strcpy(sz,value);
+    memmove(&sz[0], &sz[1], strlen(sz)); //remove a primeira posicao
+    sz[strlen(sz)-1] = '\0';
+    int size = atoi(sz);
     if (size == 0) return 1; // se nao tiver sido explicito nada nos argumentos deste parametro
     //size expressed in Megabytes
     long bytes_size = size * 1048576;
@@ -95,7 +103,8 @@ int isAboveorUnderSize(int size, bool above_size, const char *path) {
  * @param path caminho para o file a testar
  * @return true se o ficheiro tiver sido modificado dentro do tempo modifcado
  */
-int isMmin(int nnmin, const char *path) {
+int mmin(char * value, const char *path, char * d_name) {
+    int nnmin = atoi(value);
     if (nnmin == 0) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     struct stat file_stat;
 
@@ -129,12 +138,9 @@ int isMmin(int nnmin, const char *path) {
  * @param path path para o ficheiro a testar
  * @return true se o ficheiro for executavel
  */
-int isExecutable(bool executable, const char *path) {
-    if (executable == false) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+int executable(char * value, const char *path, char * d_name) {
     struct stat statbuf;
-    if (stat(path, &statbuf) == 0 && statbuf.st_mode & S_IXUSR)
-        return 1;
-    return 0;
+    return stat(path, &statbuf) == 0 && statbuf.st_mode & S_IXUSR ? 1 : 0;
 }
 
 /**
@@ -147,12 +153,10 @@ int isExecutable(bool executable, const char *path) {
  * @param path path para o ficheiro a testar
  * @return true se o ficheiro tiver vazio
  */
-int isEmpty(bool empty, const char *path) {
-    if (empty == false) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+int empty(char * value, const char *path, char * d_name) {
     struct stat statbuf;
-    if (stat(path, &statbuf) != 0)
-        return 0;
-    return statbuf.st_size == 0; // se o tamanho for 0 retorna 1
+    return stat(path, &statbuf) != 0 ? 0 : statbuf.st_size == 0;
+    // se o tamanho for 0 retorna 1
 }
 
 /**
@@ -165,8 +169,8 @@ int isEmpty(bool empty, const char *path) {
  * @param path path para o ficheiro
  * @return veradadeiro se for do tipo escolhido
  */
-int isType(const char type, const char *path) {
-    if (type == 'X') return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+int type(char * value, const char *path, char * d_name) {
+    char type = value[0];
     switch (type) {
         case 'c':
             if (isCharater(path)) {
@@ -201,44 +205,65 @@ int isType(const char type, const char *path) {
     }
 }
 
-/**
- * esta funcao ignora minusculas e maiusculas
- * passa d_name para minuscula visto que name ja foi convertido em arg_parse
- * Se os 3 estiverem a null ele automaticamente retorna true pois nao foi expecificado como argumento
- * Checka se o nome em d_name e o mesmo que name
- * ou se tem sub em name
- * ou se tem pref em name
- * um dos 3 existe os outros dois estao a null
- *
- * @param name parametro
- * @param suf parametro
- * @param pref parametro
- * @param d_name ficheiro em investigacao
- * @return retorna true se um dos 3 elementos checkar com o d_name
- */
-int isIname(const char *name, const char *suf, const char *pref, char *d_name) {
-    if (name == NULL && suf == NULL && pref == NULL)
-        return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
+
+
+int iName(char * value, const char *path, char * d_name) {
     d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
-    if (name != NULL) {
-        if (strcmp(name, d_name) == 0) {
-            return 1;
-        } else return 0;
-    }
-    if (pref != NULL) {
-        // testar se prefixo == a primeira parte de d_name
-        for (int i = 0; i < strlen(pref); i++) {
-            if (d_name[i] != pref[i]) {
-                return 0; // se for diferente retorna logo falso
-            }
+    if (strcmp(value, d_name) == 0) {
+        return 1;
+    } else return 0;
+
+}
+
+int Name(char * value, const char *path, char * d_name) {
+    if (strcmp(value, d_name) == 0) {
+        return 1;
+    } else return 0;
+
+}
+
+int p_name(char * value, const char *path, char * d_name) {
+    // testar se prefixo == a primeira parte de d_name
+    for (int i = 0; i < strlen(value); i++) {
+        if (d_name[i] != value[i]) {
+            return 0; // se for diferente retorna logo falso
         }
-        return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen (pref) posicoes de pref
     }
+    return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
+}
+
+int p_iname(char * value, const char *path, char * d_name) {
+    d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
+    // testar se prefixo == a primeira parte de d_name
+    for (int i = 0; i < strlen(value); i++) {
+        if (d_name[i] != value[i]) {
+            return 0; // se for diferente retorna logo falso
+        }
+    }
+    return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
+}
+
+int s_name(char * value, const char *path, char * d_name) {
     // testar se o sufixo  == a ultima parte de d_name
-    int last_pos_suf = strlen(suf) - 1;
+    int last_pos_suf = strlen(value) - 1;
     int last_pos_name = strlen(d_name) - 1;
     while (last_pos_suf >= 0) {
-        if (d_name[last_pos_name] != suf[last_pos_suf]) {
+        if (d_name[last_pos_name] != value[last_pos_suf]) {
+            return 0; // se for diferente retorna logo falso
+        }
+        last_pos_name--;
+        last_pos_suf--;
+    }
+    return 1;
+}
+
+int s_iname(char * value, const char *path, char * d_name) {
+    d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
+    // testar se o sufixo  == a ultima parte de d_name
+    int last_pos_suf = strlen(value) - 1;
+    int last_pos_name = strlen(d_name) - 1;
+    while (last_pos_suf >= 0) {
+        if (d_name[last_pos_name] != value[last_pos_suf]) {
             return 0; // se for diferente retorna logo falso
         }
         last_pos_name--;
@@ -248,69 +273,9 @@ int isIname(const char *name, const char *suf, const char *pref, char *d_name) {
 }
 
 
-/**
- * Se os 3 estiverem a null ele automaticamente retorna true pois nao foi expecificado como argumento
- * Checka se o nome em d_name e o mesmo que name
- * ou se tem sub em name
- * ou se tem pref em name
- * um dos 3 existe os outros dois estao a null
- *
- * @param name parametro
- * @param suf parametro
- * @param pref parametro
- * @param d_name ficheiro em investigacao
- * @return retorna true se um dos 3 elementos checkar com o d_name
- */
-int isName(const char *name, const char *suf, const char *pref, const char *d_name) {
-    if (name == NULL && suf == NULL && pref == NULL)
-        return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
-    if (name != NULL) {
-        if (strcmp(name, d_name) == 0) {
-            return 1;
-        } else return 0;
-    }
-    if (pref != NULL) {
-        // testar se prefixo == a primeira parte de d_name
-        for (int i = 0; i < strlen(pref); i++) {
-            if (d_name[i] != pref[i]) {
-                return 0; // se for diferente retorna logo falso
-            }
-        }
-        return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
-    }
-    // testar se o sufixo  == a ultima parte de d_name
-    int last_pos_suf = strlen(suf) - 1;
-    int last_pos_name = strlen(d_name) - 1;
-    while (last_pos_suf >= 0) {
-        if (d_name[last_pos_name] != suf[last_pos_suf]) {
-            return 0; // se for diferente retorna logo falso
-        }
-        last_pos_name--;
-        last_pos_suf--;
-    }
-    return 1;
-}
 
+void parse_args(int argc, char *argv[], DATA *data) {
 
-void inicialize_arguments_struct(ARGS *args) {
-    args->name = NULL;
-    args->prefix_name = NULL;
-    args->sufix_name = NULL;
-    args->iname = NULL;
-    args->prefix_iname = NULL;
-    args->sufix_iname = NULL;
-    args->type = 'X';
-    args->empty = false;
-    args->executable = false;
-    args->mmin = 0;
-    args->size = 0;
-    args->above_size = false;
-}
-
-
-void parse_args(int argc, char *argv[], DATA *data, ARGS *args) {
-
-    inicialize_arguments_struct(args);
     char path_wd[200];
     getcwd(path_wd, sizeof(path_wd));
 
@@ -336,57 +301,82 @@ void parse_args(int argc, char *argv[], DATA *data, ARGS *args) {
         int i = 2;
         while (i < argc) {
             if (strcmp(argv[i], "-name") == 0) {
+                char * sufix_name;
+                char * prefix_name;
+                char * name;
                 if (argv[i + 1][0] == '*') {
-                    args->sufix_name = malloc(sizeof(argv[i + 1]) - 1);
+
+                    data->args[data->n_args].opt = (PARAM) s_name;
+                    sufix_name = malloc(sizeof(argv[i + 1]) - 1);
                     int iterator = 0;
                     for (int j = 1; j < strlen(argv[i + 1]); j++) {
-                        args->sufix_name[iterator] = argv[i + 1][j];
+                        sufix_name[iterator] = argv[i + 1][j];
                         iterator++;
                     }
+                    data->args[data->n_args].value = sufix_name;
+                    data->n_args++;
                 }
                     // indica apenas o prefixo do nome
                 else if (argv[i + 1][strlen(argv[i + 1]) - 1] == '*') {
-                    args->prefix_name = malloc(sizeof(argv[i + 1]) - 1);
+                    data->args[data->n_args].opt = (PARAM) p_name;
+                    prefix_name = malloc(sizeof(argv[i + 1]) - 1);
                     int iterator = 0;
                     for (int j = 0; j < strlen(argv[i + 1]) - 1; j++) {
-                        args->prefix_name[iterator] = argv[i + 1][j];
+                        prefix_name[iterator] = argv[i + 1][j];
                         iterator++;
                     }
+                    data->args[data->n_args].value = prefix_name;
+                    data->n_args++;
+
                 } else {
-                    args->name = malloc(sizeof(argv[i + 1]));
-                    strcpy(args->name, argv[i + 1]);
+                    data->args[data->n_args].opt = (PARAM) Name;
+                    name = malloc(sizeof(argv[i + 1]));
+                    strcpy(name, argv[i + 1]);
+                    data->args[data->n_args].value = name;
+                    data->n_args++;
                 }
                 i += 2;
-
-
             } else if (strcmp(argv[i], "-iname") == 0) {
+                char * sufix_iname;
+                char * prefix_iname;
+                char * iname;
                 // indica apenas o sufixo do nome
                 if (argv[i + 1][0] == '*') {
-                    args->sufix_iname = malloc(sizeof(argv[i + 1]) - 1);
+                    data->args[data->n_args].opt = (PARAM) s_iname;
+                    sufix_iname = malloc(sizeof(argv[i + 1]) - 1);
                     int iterator = 0;
                     for (int j = 1; j < strlen(argv[i + 1]); j++) {
-                        args->sufix_iname[iterator] = argv[i + 1][j];
+                        sufix_iname[iterator] = argv[i + 1][j];
                         iterator++;
                     }
-                    args->sufix_iname = stringLwr(args->sufix_iname);
+                    sufix_iname = stringLwr(sufix_iname);
+                    data->args[data->n_args].value = sufix_iname;
+                    data->n_args++;
                 }
                     // indica apenas o prefixo do nome
                 else if (argv[i + 1][strlen(argv[i + 1]) - 1] == '*') {
-                    args->prefix_iname = malloc(sizeof(argv[i + 1]) - 1);
+                    data->args[data->n_args].opt = (PARAM) p_iname;
+                    prefix_iname = malloc(sizeof(argv[i + 1]) - 1);
                     int iterator = 0;
                     for (int j = 0; j < strlen(argv[i + 1]) - 1; j++) {
-                        args->prefix_iname[iterator] = argv[i + 1][j];
+                        prefix_iname[iterator] = argv[i + 1][j];
                         iterator++;
                     }
-                    args->prefix_iname = stringLwr(args->prefix_iname);
+                    prefix_iname = stringLwr(prefix_iname);
+                    data->args[data->n_args].value = prefix_iname;
+                    data->n_args++;
                 } else {
-                    args->iname = malloc(sizeof(argv[i + 1]));
-                    strcpy(args->iname, argv[i + 1]);
-                    args->iname = stringLwr(args->iname);
+                    data->args[data->n_args].opt = (PARAM) iName;
+                    iname = malloc(sizeof(argv[i + 1]));
+                    strcpy(iname, argv[i + 1]);
+                    iname = stringLwr(iname);
+                    data->args[data->n_args].value = iname;
+                    data->n_args++;
                 }
                 i += 2;
 
             } else if (strcmp(argv[i], "-type") == 0) {
+                data->args[data->n_args].opt = (PARAM) type;
                 char carecter = argv[i + 1][0];
                 // se for differente de todas nao esta dentro das escolhas para o tipo
                 if (carecter != 'c' && carecter != 'b' && carecter != 'd' && carecter != 'p' && carecter != 'f' &&
@@ -394,34 +384,40 @@ void parse_args(int argc, char *argv[], DATA *data, ARGS *args) {
                     printf("type choosed is not acepted\n");
                     exit(EXIT_FAILURE);
                 }
-                args->type = carecter;
+                char * car = malloc(1);
+                strcpy(car, &carecter);
+                data->args[data->n_args].value = car;
+                data->n_args++;
                 i += 2;
             } else if (strcmp(argv[i], "-empty") == 0) {
-                args->empty = true;
+                data->args[data->n_args].opt = (PARAM) empty;
+                data->args[data->n_args].value = "true";
+                data->n_args++;
                 i++;
             } else if (strcmp(argv[i], "-executable") == 0) {
-                args->executable = true;
+                data->args[data->n_args].opt = (PARAM) executable;
+                data->args[data->n_args].value = "true";
+                data->n_args++;
                 i++;
             } else if (strcmp(argv[i], "-mmin") == 0) {
                 char *time = argv[i + 1];
                 memmove(&time[0], &time[1], strlen(time)); //remove a primeira posicao
-                args->mmin = atoi(time);
+                data->args[data->n_args].opt = (PARAM) mmin;
+                data->args[data->n_args].value = time;
+                data->n_args++;
                 i += 2;
             } else if (strcmp(argv[i], "-size") == 0) {
-
-                if (argv[i + 1][0] == '+') args->above_size = true;
                 char *sz = argv[i + 1];
-                memmove(&sz[0], &sz[1], strlen(sz)); //remove a primeira posicao
-                args->size = atoi(sz);
+                data->args[data->n_args].opt = (PARAM) aboveorUnderSize;
+                data->args[data->n_args].value = sz;
+                data->n_args++;
                 i += 2;
             } else {
                 printf("Argumento %s nao valido\n", argv[i]);
                 break;
             }
         }
-        data->arguments = args;
     }
-
 }
 
 

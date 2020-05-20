@@ -24,21 +24,28 @@
 #include <sys/stat.h>
 #include <string.h>
 
-typedef struct args {
-    char *name, *prefix_name, *sufix_name;
-    char *iname, *prefix_iname, *sufix_iname;
 
-    char type; // X means it was not specified
-    bool empty; //starts false
-    bool executable; //starts false
-    int mmin;
-    int size;
-    bool above_size; //starts false
+typedef int (*PARAM)(char * value, const char *path, char * d_name);
+
+typedef struct args {
+    PARAM opt;
+    char *value;
+
+    //char *name, *prefix_name, *sufix_name;
+    //char *iname, *prefix_iname, *sufix_iname;
+
+    //char type; // X means it was not specified
+    //bool empty; //starts false
+    //bool executable; //starts false
+    //int mmin;
+    //int size;
+    //bool above_size; //starts false
 } ARGS;
 
 typedef struct data {
-    struct args *arguments;
+    ARGS args[50];
     char *path; // path to search from, in dept
+    int n_args;
 }DATA;
 
 
@@ -80,24 +87,22 @@ int isFifo(const char *path);
 
 char *stringLwr(char *s);
 
-int isAboveorUnderSize(int size, bool above_size, const char *path);
+int isAboveorUnderSize(char * value, const char *path, char * d_name);
 
-int isMmin(int nnmin, const char *path);
+int isMmin(char * value, const char *path, char * d_name);
 
-int isExecutable(bool executable, const char *path);
+int isExecutable(char * value, const char *path, char * d_name);
 
-int isEmpty(bool empty, const char *path);
+int isEmpty(char * value, const char *path, char * d_name);
 
-int isType(const char type, const char *path);
+int isType(char * value, const char *path, char * d_name);
 
-int isIname(const char *name, const char *suf, const char *pref, char *d_name);
-
-int isName(const char *name, const char *suf, const char *pref, const char *d_name);
+int isIname(char * value, const char *path, char * d_name);
 
 void print_struct(DATA *args);
 
 void inicialize_arguments_struct(ARGS *args);
 
-void parse_args(int argc, char *argv[], DATA * data, ARGS *args);
+void parse_args(int argc, char *argv[], DATA *data);
 
 void print_matches(THREADS *threads);

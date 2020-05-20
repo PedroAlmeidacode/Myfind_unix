@@ -16,12 +16,11 @@ int n_threads = 0;
 int main(int argc, char *argv[]) {
 
     pthread_t thread_id;
-    DATA data;
-    ARGS arguments;
+    DATA data = {.args = {NULL,""}, .n_args=0};
+
     /* requisito A */
     // altera a estrtura principal, nao precisa de locks pois ainda nao foram criados threads
-    parse_args(argc, argv, &data,
-               &arguments); // faz o parse dos argumentos recebidos do terminal e coloca os dentro da estrtura
+    parse_args(argc, argv, &data); // faz o parse dos argumentos recebidos do terminal e coloca os dentro da estrtura
     /* ************ */
     /* requsito B */
     pthread_create(&thread_id, NULL, &search, (void *) &data);
@@ -43,6 +42,7 @@ void *search(void *param) {
     char *path_to_explore = data->path;
     pthread_t ids[100];
     int i_ids = 0;
+    int j=0;
 
     // retiro o path a procurar nesta thread
     char *path_of_search = malloc(strlen(path_to_explore)); // 300 for the record
@@ -81,31 +81,29 @@ void *search(void *param) {
                 //printf("new path = %s\n",new_path);
                 // se for directorio cria outro thread para o explorar
                 if (isDirectory(new_path)) {
+
                     DATA thread_data[100];
                     (thread_data[i_ids]).path = malloc(300);
                     strcpy((thread_data[i_ids]).path, new_path);
-                    thread_data[i_ids].arguments = data->arguments;
+                    thread_data[i_ids].n_args = data->n_args;
+
+                    // copy the rray of args to the new struct
+                    for (int i = 0; i < data->n_args ; i++) {
+                        thread_data[i_ids].args[i].opt = data->args[i].opt;
+                        thread_data[i_ids].args[i].value = data->args[i].value;
+                    }
                     // lanco thread para explorar este novo path (diretorio)
                     pthread_create(&ids[i_ids], NULL, &search, &thread_data[i_ids]);
                     i_ids++;
                 }
-                // nao uso if porque pode haver pesquisa por diretorios
-                // caso nao seja pesquisa por diretorio os diretorios sao descartados a primeira funcao do if
-                // checka se o ficheiro esta dentro dos parametros estipulados em argv
-                if (isType(data->arguments->type, new_path) &&
-                    isEmpty(data->arguments->empty, new_path) &&
-                    isExecutable(data->arguments->executable, new_path) &&
-                    isMmin(data->arguments->mmin, new_path) &&
-                    isAboveorUnderSize(data->arguments->size, data->arguments->above_size, new_path) &&
-                    isName(data->arguments->name, data->arguments->sufix_name, data->arguments->prefix_name,
-                           name_of_file) &&
-                    isIname(data->arguments->iname, data->arguments->sufix_iname, data->arguments->prefix_iname,
-                            name_of_file)) {
 
-                    //printf("\nmatch\n");
-                    // se for o primeiro match
+                for (j = 0; j < data->n_args ; j++) {
+                    if(!data->args[j].opt(data->args[j].value,new_path,name_of_file)){
+                        break;
+                    }
+                }
 
-
+                if (j == data->n_args) {
                     if (n_matches == 0) {
                         // retorna a struct existente se ela existir, cria strcuct match se ela nao existir
                         // se ela nao existir cria a e cria a strcut match dando os devidos paramnetros
@@ -121,8 +119,10 @@ void *search(void *param) {
 
                     //print_struct(newThread); // imprime a estrutura principal
                     n_matches++;
+
                 }
             }
+
         }
         if(i_ids > 0) closedir(dir);
     }
@@ -147,6 +147,7 @@ void print_matches(THREADS *threads) {
     pthread_mutex_unlock(&trinco);
 }
 
+/*
 void print_struct(DATA *args) {
 
     printf("path: %s\n", args->path);
@@ -158,7 +159,7 @@ void print_struct(DATA *args) {
     printf("mmin: %d\n", args->arguments->mmin);
     printf("size: %d above this: %d\n", args->arguments->size, args->arguments->above_size);
 }
-
+*/
 
 THREADS *create_thread_and_match(pthread_t self, char *new_path) {
 
