@@ -292,42 +292,6 @@ int isName(const char *name, const char *suf, const char *pref, const char *d_na
 }
 
 
-THREADS *find_my_thread_struct(pthread_t self, THREADS *mainThread) {
-    THREADS *temp = mainThread;
-    THREADS *t = temp;
-    int i = 0;
-    // procura se ja existe
-    while (temp != NULL) {
-        if (temp->thread_id == self) {
-            MATCHES *newMatch = malloc(sizeof *newMatch);
-            newMatch->next = NULL;
-            temp->matches = newMatch; // the head of the matches
-            return temp;
-        }
-        temp = temp->next;
-        if (i != 0) t = t->next; // fica sempre com a posicao anterior a temp
-        i++;
-    }
-
-    printf("Criar nova thread\n");
-
-    //se nao existir crio
-    THREADS *newThread = malloc(sizeof *newThread);
-    newThread->thread_id = self;
-    newThread->next = NULL;
-    newThread->n_matches = 1;
-    newThread->n_threads = mainThread->n_threads;
-    mainThread->n_threads++;
-
-
-    MATCHES *newMatch = malloc(sizeof *newMatch);
-    newMatch->next = NULL;
-    newThread->matches = newMatch; // the head of the matches
-    t->next = newThread; // proxima posicao NULL igual ao novo thread
-
-    return newThread;
-}
-
 void inicialize_arguments_struct(ARGS *args) {
     args->name = NULL;
     args->prefix_name = NULL;

@@ -46,7 +46,6 @@ typedef struct data {
 
 typedef struct threads {
     struct matches *matches;
-    int n_threads; // numero de threads criadas no total
     pthread_t thread_id;  //id of the thread
     struct threads *next; // threads created when found a directory, nexy = tail->next
     int n_matches; // numnero de matches encontrados ou seja numero de strings em matches
@@ -60,9 +59,8 @@ typedef struct matches {
 } MATCHES;
 
 
-
-
-THREADS *find_my_thread_struct(pthread_t self, THREADS *mainThread);
+MATCHES *create_new_match_in_thread(MATCHES *current_match,char *new_path);
+THREADS *create_thread_and_match(pthread_t self, char *new_path);
 
 void *search(void *param);
 

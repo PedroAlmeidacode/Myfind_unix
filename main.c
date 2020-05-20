@@ -8,6 +8,9 @@
 
 pthread_mutex_t trinco = PTHREAD_MUTEX_INITIALIZER;
 
+THREADS *head = NULL;
+int n_threads = 0;
+
 //PERGUNTAS
 // duas thread estao a ir buscar o mesmo path
 int main(int argc, char *argv[]) {
@@ -24,7 +27,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&thread_id, NULL, &search, (void *) &data);
     pthread_join(thread_id, NULL); //espera que a main thread termine
 
-    //print_matches(mainThread);
+    print_matches(head);
 
 
 }
@@ -41,7 +44,6 @@ void *search(void *param) {
     pthread_t ids[100];
     int i_ids = 0;
 
-    printf("Threaad %lu recebeu path %s para explorar\n", pthread_self(), path_to_explore);
     // retiro o path a procurar nesta thread
     char *path_of_search = malloc(strlen(path_to_explore)); // 300 for the record
     strcpy(path_of_search, path_to_explore);
@@ -82,13 +84,11 @@ void *search(void *param) {
                     DATA thread_data[100];
                     (thread_data[i_ids]).path = malloc(300);
                     strcpy((thread_data[i_ids]).path, new_path);
-                    thread_data->arguments = data->arguments;
+                    thread_data[i_ids].arguments = data->arguments;
                     // lanco thread para explorar este novo path (diretorio)
                     pthread_create(&ids[i_ids], NULL, &search, &thread_data[i_ids]);
                     i_ids++;
                 }
-
-
                 // nao uso if porque pode haver pesquisa por diretorios
                 // caso nao seja pesquisa por diretorio os diretorios sao descartados a primeira funcao do if
                 // checka se o ficheiro esta dentro dos parametros estipulados em argv
@@ -97,60 +97,34 @@ void *search(void *param) {
                     isExecutable(data->arguments->executable, new_path) &&
                     isMmin(data->arguments->mmin, new_path) &&
                     isAboveorUnderSize(data->arguments->size, data->arguments->above_size, new_path) &&
-                    isName(data->arguments->name, data->arguments->sufix_name, data->arguments->prefix_name, name_of_file) &&
-                    isIname(data->arguments->iname, data->arguments->sufix_iname, data->arguments->prefix_iname, name_of_file)) {
+                    isName(data->arguments->name, data->arguments->sufix_name, data->arguments->prefix_name,
+                           name_of_file) &&
+                    isIname(data->arguments->iname, data->arguments->sufix_iname, data->arguments->prefix_iname,
+                            name_of_file)) {
 
                     //printf("\nmatch\n");
                     // se for o primeiro match
-                    pthread_mutex_lock(&trinco);
 
-                    if (n_matches == 0 ) {
+
+                    if (n_matches == 0) {
                         // retorna a struct existente se ela existir, cria strcuct match se ela nao existir
                         // se ela nao existir cria a e cria a strcut match dando os devidos paramnetros
-                        newThread = find_my_thread_struct(pthread_self(), mainThread);
-                        if (newThread == mainThread){ // para o caso da newthread ser a mainThread
-                            MATCHES *match = malloc(sizeof *match);
-                            match->next = NULL;
-                            match->match = new_path;
-                            if (newThread->n_matches == 1) { // caso ja tenha um match encontrado na main
-                                newMatch = newThread->matches;
-                                newMatch->next = match;
-                                newMatch = newMatch->next; // atualizar variavel local newmatch
-                                n_matches += 2; //atualiza numero de matches
-                            } else { // caso seja o primeiro match de mainThread
-                                newMatch = match;
-                                newThread->matches = match;
-                                n_matches++;
-                            }
-                            newThread->n_matches++;
-                        } else { // caso seja uma nova thread criada
-                            //atualizar variavel local newmatch
-                            newMatch = newThread->matches;
-                            newMatch->match = new_path; // colocar o match na string
-                        }
+                        newThread = create_thread_and_match(pthread_self(), new_path);
+                        newMatch = newThread->matches;
                     } else {
                         // neste caso ja temos as structs criadas
                         //temos de ir a ultima posicao de match para criar outra struct match
-                        MATCHES *match = malloc(sizeof *match);
-                        match->next = NULL;
-                        match->match = new_path;
-
-                        newMatch->next = match;
-                        // atualizar variavel local newmatch
-                        newMatch = newMatch->next;
+                        newMatch = create_new_match_in_thread(newMatch, new_path);
                         //atualiza numero de matches
                         newThread->n_matches++;
                     }
-                    pthread_mutex_unlock(&trinco);
+
                     //print_struct(newThread); // imprime a estrutura principal
                     n_matches++;
                 }
-
-
-
             }
         }
-        // closedir(dir);
+        if(i_ids > 0) closedir(dir);
     }
     for (int i = 0; i <= i_ids; i++) {
         pthread_join(ids[i], NULL);
@@ -162,7 +136,7 @@ void print_matches(THREADS *threads) {
     printf("Result : \n");
     pthread_mutex_lock(&trinco);
     THREADS *tmp = threads; // tmp fica com a primeria thrad inicializada
-    for (int i = 0; i < threads->n_threads; i++) {
+    for (int i = 0; i < n_threads; i++) {
         MATCHES *mat = tmp->matches; // tmp fica com a primeria thrad inicializada
         for (int j = 0; j < tmp->n_matches; j++) {
             printf("%s\n", mat->match);
@@ -175,8 +149,6 @@ void print_matches(THREADS *threads) {
 
 void print_struct(DATA *args) {
 
-    pthread_mutex_lock(&trinco);
-
     printf("path: %s\n", args->path);
     printf("name: %s%s%s\n", args->arguments->name, args->arguments->sufix_name, args->arguments->prefix_name);
     printf("iname: %s%s%s\n", args->arguments->iname, args->arguments->sufix_iname, args->arguments->prefix_iname);
@@ -185,7 +157,44 @@ void print_struct(DATA *args) {
     printf("executable: %d\n", args->arguments->executable);
     printf("mmin: %d\n", args->arguments->mmin);
     printf("size: %d above this: %d\n", args->arguments->size, args->arguments->above_size);
-
-    pthread_mutex_unlock(&trinco);
 }
 
+
+THREADS *create_thread_and_match(pthread_t self, char *new_path) {
+
+    MATCHES *newMatch = malloc(sizeof *newMatch);
+    newMatch->next = NULL;
+    newMatch->match = new_path; // colocar o match na string
+
+    THREADS *newThread = malloc(sizeof *newThread);
+    newThread->thread_id = self;
+    newThread->next = NULL;
+    newThread->n_matches = 1;
+    newThread->matches = newMatch; // the head of the matches
+
+    pthread_mutex_lock(&trinco);
+    n_threads++;
+    if(head == NULL){ // no caso de ainda nao ter sido criada nenhuma estrutura esta primeira ficara assigned a variavel global head
+        head = newThread;
+
+    } else{
+        THREADS *current = head;
+        THREADS *next = current->next;
+        // procura a ultima posicao da linked list
+        while (next != NULL) {
+            current = next;
+            next = current->next;
+        }
+        current->next = newThread; // proxima posicao NULL igual ao novo thread
+    }pthread_mutex_unlock(&trinco);
+
+    return newThread;
+}
+
+MATCHES *create_new_match_in_thread(MATCHES *current_match, char *new_path) {
+    MATCHES *match = malloc(sizeof *match);
+    match->next = NULL;
+    match->match = new_path;
+    current_match->next = match;
+    return match;
+}
