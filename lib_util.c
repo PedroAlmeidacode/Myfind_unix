@@ -75,14 +75,14 @@ char *stringLwr(char *s) {
  * @param path ca,imho para o ficheiro a testar
  * @return true se estiver nos tamanbos estipulados
  */
-int aboveorUnderSize(char * value, const char *path, char * d_name) {
+int aboveorUnderSize(char *value, const char *path, char *d_name) {
 
     bool above_size = false;
     if (value[0] == '+') above_size = true;
-    char * sz = malloc(10);
-    strcpy(sz,value);
+    char *sz = malloc(10);
+    strcpy(sz, value);
     memmove(&sz[0], &sz[1], strlen(sz)); //remove a primeira posicao
-    sz[strlen(sz)-1] = '\0';
+    sz[strlen(sz) - 1] = '\0';
     int size = atoi(sz);
     if (size == 0) return 1; // se nao tiver sido explicito nada nos argumentos deste parametro
     //size expressed in Megabytes
@@ -103,7 +103,7 @@ int aboveorUnderSize(char * value, const char *path, char * d_name) {
  * @param path caminho para o file a testar
  * @return true se o ficheiro tiver sido modificado dentro do tempo modifcado
  */
-int mmin(char * value, const char *path, char * d_name) {
+int mmin(char *value, const char *path, char *d_name) {
     int nnmin = atoi(value);
     if (nnmin == 0) return 1;  // se nao tiver sido explicito nada nos argumentos deste parametro
     struct stat file_stat;
@@ -138,7 +138,7 @@ int mmin(char * value, const char *path, char * d_name) {
  * @param path path para o ficheiro a testar
  * @return true se o ficheiro for executavel
  */
-int executable(char * value, const char *path, char * d_name) {
+int executable(char *value, const char *path, char *d_name) {
     struct stat statbuf;
     return stat(path, &statbuf) == 0 && statbuf.st_mode & S_IXUSR ? 1 : 0;
 }
@@ -153,7 +153,7 @@ int executable(char * value, const char *path, char * d_name) {
  * @param path path para o ficheiro a testar
  * @return true se o ficheiro tiver vazio
  */
-int empty(char * value, const char *path, char * d_name) {
+int empty(char *value, const char *path, char *d_name) {
     struct stat statbuf;
     return stat(path, &statbuf) != 0 ? 0 : statbuf.st_size == 0;
     // se o tamanho for 0 retorna 1
@@ -169,7 +169,7 @@ int empty(char * value, const char *path, char * d_name) {
  * @param path path para o ficheiro
  * @return veradadeiro se for do tipo escolhido
  */
-int type(char * value, const char *path, char * d_name) {
+int type(char *value, const char *path, char *d_name) {
     char type = value[0];
     switch (type) {
         case 'c':
@@ -206,8 +206,7 @@ int type(char * value, const char *path, char * d_name) {
 }
 
 
-
-int iName(char * value, const char *path, char * d_name) {
+int iName(char *value, const char *path, char *d_name) {
     d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
     if (strcmp(value, d_name) == 0) {
         return 1;
@@ -215,14 +214,14 @@ int iName(char * value, const char *path, char * d_name) {
 
 }
 
-int Name(char * value, const char *path, char * d_name) {
+int Name(char *value, const char *path, char *d_name) {
     if (strcmp(value, d_name) == 0) {
         return 1;
     } else return 0;
 
 }
 
-int p_name(char * value, const char *path, char * d_name) {
+int p_name(char *value, const char *path, char *d_name) {
     // testar se prefixo == a primeira parte de d_name
     for (int i = 0; i < strlen(value); i++) {
         if (d_name[i] != value[i]) {
@@ -232,7 +231,7 @@ int p_name(char * value, const char *path, char * d_name) {
     return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
 }
 
-int p_iname(char * value, const char *path, char * d_name) {
+int p_iname(char *value, const char *path, char *d_name) {
     d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
     // testar se prefixo == a primeira parte de d_name
     for (int i = 0; i < strlen(value); i++) {
@@ -243,7 +242,7 @@ int p_iname(char * value, const char *path, char * d_name) {
     return 1; // se sair fora do for quer dizer que pref e igual as primeiras strlen(pref) posicoes de pref
 }
 
-int s_name(char * value, const char *path, char * d_name) {
+int s_name(char *value, const char *path, char *d_name) {
     // testar se o sufixo  == a ultima parte de d_name
     int last_pos_suf = strlen(value) - 1;
     int last_pos_name = strlen(d_name) - 1;
@@ -257,7 +256,7 @@ int s_name(char * value, const char *path, char * d_name) {
     return 1;
 }
 
-int s_iname(char * value, const char *path, char * d_name) {
+int s_iname(char *value, const char *path, char *d_name) {
     d_name = stringLwr(d_name); // passa o nome do ficheiro encontrado para minuscula
     // testar se o sufixo  == a ultima parte de d_name
     int last_pos_suf = strlen(value) - 1;
@@ -271,7 +270,6 @@ int s_iname(char * value, const char *path, char * d_name) {
     }
     return 1;
 }
-
 
 
 void parse_args(int argc, char *argv[], DATA *data) {
@@ -287,7 +285,7 @@ void parse_args(int argc, char *argv[], DATA *data) {
         if (tmp == '.') {
             if (strlen(argv[1]) == 1) {
                 data->path = malloc(strlen(path_wd) + 1);
-                sprintf(data->path, "%s/", path_wd);
+                sprintf(data->path, "%s", path_wd);
             } else {
                 char *path_arg = argv[1];
                 memmove(&path_arg[0], &path_arg[1], strlen(path_arg)); //remove a primeira posicao
@@ -301,9 +299,9 @@ void parse_args(int argc, char *argv[], DATA *data) {
         int i = 2;
         while (i < argc) {
             if (strcmp(argv[i], "-name") == 0) {
-                char * sufix_name;
-                char * prefix_name;
-                char * name;
+                char *sufix_name;
+                char *prefix_name;
+                char *name;
                 if (argv[i + 1][0] == '*') {
 
                     data->args[data->n_args].opt = (PARAM) s_name;
@@ -337,9 +335,9 @@ void parse_args(int argc, char *argv[], DATA *data) {
                 }
                 i += 2;
             } else if (strcmp(argv[i], "-iname") == 0) {
-                char * sufix_iname;
-                char * prefix_iname;
-                char * iname;
+                char *sufix_iname;
+                char *prefix_iname;
+                char *iname;
                 // indica apenas o sufixo do nome
                 if (argv[i + 1][0] == '*') {
                     data->args[data->n_args].opt = (PARAM) s_iname;
@@ -384,7 +382,7 @@ void parse_args(int argc, char *argv[], DATA *data) {
                     printf("type choosed is not acepted\n");
                     exit(EXIT_FAILURE);
                 }
-                char * car = malloc(1);
+                char *car = malloc(1);
                 strcpy(car, &carecter);
                 data->args[data->n_args].value = car;
                 data->n_args++;

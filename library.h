@@ -30,25 +30,13 @@ typedef int (*PARAM)(char * value, const char *path, char * d_name);
 typedef struct args {
     PARAM opt;
     char *value;
-
-    //char *name, *prefix_name, *sufix_name;
-    //char *iname, *prefix_iname, *sufix_iname;
-
-    //char type; // X means it was not specified
-    //bool empty; //starts false
-    //bool executable; //starts false
-    //int mmin;
-    //int size;
-    //bool above_size; //starts false
 } ARGS;
 
 typedef struct data {
-    ARGS args[50];
+    ARGS args[10];
     char *path; // path to search from, in dept
     int n_args;
 }DATA;
-
-
 
 
 typedef struct threads {
@@ -70,39 +58,13 @@ MATCHES *create_new_match_in_thread(MATCHES *current_match,char *new_path);
 THREADS *create_thread_and_match(pthread_t self, char *new_path);
 
 void *search(void *param);
-
 int isSocket(const char *path);
-
 int isCharater(const char *path);
-
 int isBlock(const char *path);
-
 int isSymbolicLink(const char *path);
-
 int isFile(const char *path);
-
 int isDirectory(const char *path);
-
 int isFifo(const char *path);
-
 char *stringLwr(char *s);
-
-int isAboveorUnderSize(char * value, const char *path, char * d_name);
-
-int isMmin(char * value, const char *path, char * d_name);
-
-int isExecutable(char * value, const char *path, char * d_name);
-
-int isEmpty(char * value, const char *path, char * d_name);
-
-int isType(char * value, const char *path, char * d_name);
-
-int isIname(char * value, const char *path, char * d_name);
-
-void print_struct(DATA *args);
-
-void inicialize_arguments_struct(ARGS *args);
-
 void parse_args(int argc, char *argv[], DATA *data);
-
 void print_matches(THREADS *threads);

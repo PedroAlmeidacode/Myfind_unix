@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/pedro/Desktop/Myfind_unix/lib_util.c
-library.h
-/home/pedro/Desktop/Myfind_unix/library.h
-
 /home/pedro/Desktop/Myfind_unix/library.h
 time.h
 -
@@ -41,4 +37,8 @@ sys/stat.h
 -
 string.h
 -
+
+/home/pedro/Desktop/Myfind_unix/main.c
+library.h
+/home/pedro/Desktop/Myfind_unix/library.h
 
